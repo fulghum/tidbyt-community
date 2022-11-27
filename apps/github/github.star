@@ -36,7 +36,7 @@ def main(config):
     print("gazer_count: %s " % gazer_count)
 
     image_size = 16
-    msg = "%s stargazers" % humanize.comma(gazer_count)
+    msg = "%s stars" % humanize.comma(gazer_count)
 
     display_name = "%s/%s" % (org_name, repo_name)
     username_child = render.Text(
