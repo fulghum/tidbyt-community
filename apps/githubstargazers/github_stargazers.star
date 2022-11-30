@@ -30,9 +30,8 @@ def send_github_request(url, query_params):
     return json.decode(res.body())
 
 def main(config):    
-    # TODO: Read from app config / schema
-    org_name = 'dolthub'
-    repo_name = 'dolt'
+    org_name = config.get("org_name", "dolthub")
+    repo_name = config.get("repo_name", "dolt")
 
     print("Fetching GitHub stargazer count...")
     # TODO: Add caching
@@ -85,5 +84,18 @@ def main(config):
 def get_schema():
     return schema.Schema(
         version = "1",
-        fields = [],
+        fields = [
+            schema.Text(
+                id = "org_name",
+                name = "Org Name",
+                icon = "user",
+                desc = "Name of the organization, or account, containing the GitHub repository",
+            ),
+            schema.Text(
+                id = "repo_name",
+                name = "Repo Name",
+                icon = "user",
+                desc = "Name of the GitHub repository for which to display stargazer count",
+            ),
+        ],
     )
