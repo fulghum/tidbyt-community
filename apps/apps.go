@@ -50,6 +50,7 @@ import (
 	"tidbyt.dev/community/apps/destiny2stats"
 	"tidbyt.dev/community/apps/digibyteprice"
 	"tidbyt.dev/community/apps/digitalrain"
+	"tidbyt.dev/community/apps/dolthubgraph"
 	"tidbyt.dev/community/apps/duolingo"
 	"tidbyt.dev/community/apps/dutchfuzzyclock"
 	"tidbyt.dev/community/apps/dvdlogo"
@@ -71,6 +72,8 @@ import (
 	"tidbyt.dev/community/apps/fullybinarytime"
 	"tidbyt.dev/community/apps/fuzzyclock"
 	"tidbyt.dev/community/apps/gapilotbuddy"
+	"tidbyt.dev/community/apps/github"
+	"tidbyt.dev/community/apps/githubstargazers"
 	"tidbyt.dev/community/apps/goodservice"
 	"tidbyt.dev/community/apps/happyhour"
 	"tidbyt.dev/community/apps/hexdailystats"
@@ -281,6 +284,7 @@ func GetManifests() []manifest.Manifest {
 		destiny2stats.New(),
 		digibyteprice.New(),
 		digitalrain.New(),
+		dolthubgraph.New(),
 		duolingo.New(),
 		dutchfuzzyclock.New(),
 		dvdlogo.New(),
@@ -302,6 +306,8 @@ func GetManifests() []manifest.Manifest {
 		fullybinarytime.New(),
 		fuzzyclock.New(),
 		gapilotbuddy.New(),
+		github.New(),
+		githubstargazers.New(),
 		goodservice.New(),
 		happyhour.New(),
 		hexdailystats.New(),
