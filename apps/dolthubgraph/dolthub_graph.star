@@ -14,28 +14,15 @@ load("render.star", "render")
 load("schema.star", "schema")
 #load("secret.star", "secret")
 
-#  1. Write SQL query for exact data size 
-DOLTHUB_QUERY = "SELECT date, installs_30d FROM `homebrew_metrics` ORDER BY `date` desc LIMIT 7;"
-# TODO: extract query and urlencoding
-DOLTHUB_URL = "https://www.dolthub.com/api/v1alpha1/jfulghum/test/main?q=SELECT+date%2C+installs_30d%0AFROM+%60homebrew_metrics%60%0AORDER+BY+%60date%60+desc+%0ALIMIT+7%3B%0A"
+# https://www.dolthub.com/repositories/jfulghum/test/query/main?active=Tables&q=SELECT+date%2C+installs_30d%0AFROM+%60homebrew_metrics%60%0AORDER+BY+%60date%60+desc+%0ALIMIT+7%3B%0A
+DOLTHUB_SQL_QUERY = "SELECT date, installs_30d FROM `homebrew_metrics` ORDER BY `date` desc LIMIT 30;"
+
+DOLTHUB_URL = "https://www.dolthub.com/api/v1alpha1/jfulghum/test/main?q=%s"
 
 
-def send_dolthub_request(): #url, query_params, config):
-    #api_key = secret.decrypt(ENCRYPTED_GITHUB_API_KEY) or config.get("dev_api_key")
-
-    #headers = {}
-    #if api_key == None:
-    #    print("warning: no api_key available; sending request without authentication")
-    #else:
-    #    headers = {
-    #        "Authorization": "token %s" % api_key,
-    #    }
-
+def send_dolthub_request(query): 
     res = http.get(
-        url = DOLTHUB_URL,
-        # TODO:
-        #url = url % humanize.url_encode(query_params),
-        #headers = headers,
+        url = DOLTHUB_URL % humanize.url_encode(query),
     )
     if res.status_code != 200:
         print("DoltHub API request failed: %s - %s " % (res.status_code, res.body()))
@@ -43,36 +30,54 @@ def send_dolthub_request(): #url, query_params, config):
 
     return json.decode(res.body())
 
+def extract_data_points(rows):
+    data = []
+    i = 0
+    maxy = float(rows[0]["installs_30d"])
+    miny = maxy
+    for row in rows:
+        value = float(row["installs_30d"])
+        if value > maxy:
+            maxy = value
+        if value < miny:
+            miny = value            
+        data.append((i, value))
+        i = i+1
+
+    minx = 0
+    maxx = i-1
+    print("maxy: ", maxy)
+    print("miny: ", miny)
+    print("maxx: ", maxx)
+    print("minx: ", minx)
+    return data, minx, maxx, miny, maxy
+
 def main(config):
+    response = send_dolthub_request(DOLTHUB_SQL_QUERY)
+    rows = response["rows"]    
+    data, minx, maxx, miny, maxy = extract_data_points(rows)
 
-    # NEXT STEPS: 
-    #  2. Send GET request to DoltHub API
-    response = send_dolthub_request()
-    rows = response["rows"]
-
-    #  3. Plug data into plot 
     return render.Root(
-        child = render.Plot(
-            data = [
-                (0, float(rows[6]["installs_30d"])),
-                (1, float(rows[5]["installs_30d"])),
-                (2, float(rows[4]["installs_30d"])),
-                (3, float(rows[3]["installs_30d"])),
-                (4, float(rows[2]["installs_30d"])),
-                (5, float(rows[1]["installs_30d"])),
-                (6, float(rows[0]["installs_30d"])),
-#                (7, rows[0]["installs_30d"]),
-#                (8, rows[0]["installs_30d"]),
-#                (9, rows[0]["installs_30d"]),
+        child = render.Column(
+            children=[
+                render.Marquee(
+                    width=64,
+                    child=render.Text("Dolt Homebrew Downloads - last 30 days"),
+                    offset_start=5,
+                    offset_end=32,
+                ),
+                render.Plot(
+                    data = data,
+                    width = 64,
+                    height = 25, # TODO: ???
+                    color = "#0f0",
+                    color_inverted = "#f00",
+                    x_lim = (minx, maxx),
+                    y_lim = (miny-200, maxy+200),
+                    fill = True,
+                ),
             ],
-            width = 64,
-            height = 32,
-            color = "#0f0",
-            color_inverted = "#f00",
-            x_lim = (0, 6), # TODO: 
-            y_lim = (700, 1200), # TODO: 
-            fill = True,
-            ),
+        )
     )
 
 def get_schema():
