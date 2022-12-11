@@ -62,14 +62,18 @@ def main(config):
             children=[
                 render.Marquee(
                     width=64,
-                    child=render.Text("Dolt Homebrew Downloads - last 30 days"),
+                    child=render.Text(
+                        content="Dolt Homebrew Downloads - last 30 days",
+                        font="tb-8",
+                        color="#4078c0",
+                    ),
                     offset_start=5,
                     offset_end=32,
                 ),
                 render.Plot(
                     data = data,
                     width = 64,
-                    height = 25, # TODO: ???
+                    height = 32-8,
                     color = "#0f0",
                     color_inverted = "#f00",
                     x_lim = (minx, maxx),
